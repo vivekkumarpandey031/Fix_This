@@ -29,6 +29,6 @@ func main() {
 	//Add handlers
 
 	fmt.Println("Server started and listening on port->", PORT)
-	srv.ListenAndServe()
+	srv.ListenAndServe() //starting server
 
 }
