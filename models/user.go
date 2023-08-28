@@ -1,4 +1,4 @@
-//User Model
+//User Model 
 package models
 
 import (
