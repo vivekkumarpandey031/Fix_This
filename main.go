@@ -6,11 +6,12 @@ package main
 import (
 	"context"
 	"golang-project/database"
-	//"demo/handlers"
+	"golang-project/handlers"
 	"flag"
 	"fmt"
 	"net/http"
 	"time"
+
 	"github.com/gorilla/mux"
 )
 
@@ -53,5 +54,14 @@ func main() {
 		Handler:      router, // Pass our instance of gorilla/mux in.
 	}
 	
+	userDB:=new(database.User)
+	userDB.Client=client
+	userDB.Dbname="userdb"
+	userDB.Collection="users"
+	userHandler:=new(handlers.UserHandler)
+	userHandler.DB=userDB
+	
+	//Add endpoints
+	router.HandleFunc("/user/register",userHandler.Regsiter)
 	srv.ListenAndServe()
 }
