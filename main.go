@@ -15,13 +15,13 @@ import (
 )
 
 var (
-	dsn="mongodb+srv://abhinav:abhinav@cluster0.snfeuii.mongodb.net/?retryWrites=true&w=majority"
+	dsn="mongodb+srv://vscoproject:victoriasecret@cluster0.snfeuii.mongodb.net/?retryWrites=true&w=majority"
 	PORT   string
 )
 
 func main() {
 	// Create a new client and connect to the server
-	client, err := database.GetConnection("mongodb+srv://vscoproject:victoriasecret@cluster0.snfeuii.mongodb.net/?retryWrites=true&w=majority")
+	client, err := database.GetConnection(dsn)
 	if err != nil {
 		panic(err)
 	}
