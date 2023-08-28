@@ -1,34 +1,57 @@
+// abhinav OBLLnnzk3BGqwlgl
+//"mongodb+srv://abhinav:OBLLnnzk3BGqwlgl@cluster0.snfeuii.mongodb.net/?retryWrites=true&w=majority"
+
 package main
 
 import (
+	"context"
+	"golang-project/database"
+	//"demo/handlers"
 	"flag"
 	"fmt"
 	"net/http"
 	"time"
-
 	"github.com/gorilla/mux"
 )
 
-var PORT string
+var (
+	dsn="mongodb+srv://abhinav:abhinav@cluster0.snfeuii.mongodb.net/?retryWrites=true&w=majority"
+	PORT   string
+)
 
 func main() {
-	flag.StringVar(&PORT, "port", "8080", "--port 8080 or -port 8080")
-	flag.Parse()
-
-	router := mux.NewRouter() //Returns a  new router instance
-
-	//Creating a custum server for more control
-	srv := http.Server{
-		Addr:         ":" + PORT, //Pass the custum port
-		Handler:      router,     //Pass the instance of gorilla mux
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
-		IdleTimeout:  60 * time.Second,
+	// Create a new client and connect to the server
+	client, err := database.GetConnection("mongodb+srv://abhinav:abhinav@cluster0.snfeuii.mongodb.net/?retryWrites=true&w=majority")
+	if err != nil {
+		panic(err)
 	}
 
-	//Add handlers
+	//Disconnect function to disconnect connection after the work is done
+	defer func() {
+		if err = client.Disconnect(context.TODO()); err != nil {
+			panic(err)
+		}
+	}()
+	
+	err=database.Ping(client,"demo")
+	if err != nil {
+		panic(err)
+	} else {
+		fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
+	}
 
-	fmt.Println("Server started and listening on port->", PORT)
-	srv.ListenAndServe() //starting server
+	flag.StringVar(&PORT, "port", "50080", "--port=50080 or -port=50080")
+	flag.Parse()
 
+	router := mux.NewRouter()
+
+	srv := http.Server{
+		Addr:         ":" + PORT,
+		WriteTimeout: time.Second * 15,
+		ReadTimeout:  time.Second * 15,
+		IdleTimeout:  time.Second * 60,
+		Handler:      router, // Pass our instance of gorilla/mux in.
+	}
+	
+	srv.ListenAndServe()
 }
