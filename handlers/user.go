@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"golang-project/database"
 	"golang-project/models"
 	"net/http"
@@ -118,13 +117,12 @@ func (u * UserHandler)Login(w http.ResponseWriter,r * http.Request ){
 		return
 	}
 
-	fmt.Println(user)
 
 	//Authenticate if the data is correct
 	//ctx,cancel:=context.WithDeadline(context.Background(),time.Now().Add(10))
 	//defer cancel()
-	_,err=u.DB.Find(context.TODO(),user)
-	if err!=nil{
+	data,err:=u.DB.Find(context.TODO(),user)
+	if data==nil || err!=nil{
 		glog.Errorln(err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Invalid Data.Please contact admin"))
