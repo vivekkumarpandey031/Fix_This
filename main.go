@@ -5,13 +5,13 @@ package main
 
 import (
 	"context"
-	"golang-project/database"
-	"golang-project/handlers"
 	"flag"
 	"fmt"
+	"golang-project/database"
+	"golang-project/handlers"
+	"golang-project/middleware"
 	"net/http"
 	"time"
-
 	"github.com/gorilla/mux"
 )
 
@@ -19,6 +19,12 @@ var (
 	dsn="mongodb+srv://vscoproject:victoriasecret@cluster0.snfeuii.mongodb.net/?retryWrites=true&w=majority"
 	PORT   string
 )
+
+
+func init(){
+	flag.Set("logtostderr", "true")
+	flag.Parse()
+}
 
 func main() {
 	// Create a new client and connect to the server
@@ -61,7 +67,9 @@ func main() {
 	userHandler:=new(handlers.UserHandler)
 	userHandler.DB=userDB
 	
+	router.Use(middleware.WriteToConsole)
 	//Add endpoints
 	router.HandleFunc("/user/register",userHandler.Regsiter)
 	srv.ListenAndServe()
 }
+
