@@ -37,18 +37,21 @@ func (u *User) Find(ctx context.Context, data *models.User) (*models.User, error
 	if err!=nil{
 		return nil,err
 	}
-
+	
 	var users []models.User
 	if err=results.All(context.TODO(),&users);err!=nil{
 		return nil,err
 	}
 
+	if len(users)==0{
+		return nil,errors.New("No documents found")
+	}
+
 	for _,user:=range users{
 		encryptionErr:=bcrypt.CompareHashAndPassword([]byte(user.Password),[]byte(data.Password))
 		if encryptionErr==nil{
-			return data,nil
+			return data,encryptionErr
 		}
-
 	}
 	
 	return nil,errors.New("Encryption error")
