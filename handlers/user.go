@@ -3,11 +3,14 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"golang-project/database"
 	"golang-project/models"
 	"net/http"
+	"os"
 
 	"github.com/golang/glog"
+	"github.com/gorilla/sessions"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -39,6 +42,8 @@ func init(){
 	DbName="userdb"
 	Collection="users"
 } */
+
+var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
 
 func(u *UserHandler)Regsiter(w http.ResponseWriter,r *http.Request){
 	if r.Method!="POST"{
@@ -83,6 +88,9 @@ func(u *UserHandler)Regsiter(w http.ResponseWriter,r *http.Request){
 		w.Write([]byte(err.Error()))
 		return
 	}
+
+	//Add it to the session
+
 	w.Write([]byte(result.(primitive.ObjectID).String()))
 }
 
@@ -128,10 +136,45 @@ func (u * UserHandler)Login(w http.ResponseWriter,r * http.Request ){
 		w.Write([]byte("Invalid Data.Please contact admin"))
 		return
 	}
+
+	//Get a session
+	session,_:=store.Get(r,"user")
+	//Set some session values
+	session.Values["username"]=data.Name
+	session.Values["password"]=data.Password
+
+	err = session.Save(r, w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	//just testing
 	w.Header().Set("Content-type","plain/text")
 	w.Write([]byte("Succesful login"))
 } 
+
+
+func (u* UserHandler) Me(w http.ResponseWriter,r *http.Request){
+	if r.Method!="GET"{
+		glog.Errorln("Method not implemented")
+		w.WriteHeader(http.StatusNotImplemented)
+		w.Write([]byte("Method not implemented"))
+		return
+
+	}
+
+	session,err:=store.Get(r,"user")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Retrieve our session values
+	username := session.Values["username"]
+	password:=session.Values["password"]
+	w.Write([]byte(fmt.Sprintf("My username is %v and password is %v", username,password)))
+
+}
 
 
 
