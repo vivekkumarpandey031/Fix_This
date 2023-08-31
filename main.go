@@ -11,13 +11,17 @@ import (
 	"golang-project/handlers"
 	"golang-project/middleware"
 	"net/http"
+	"os"
 	"time"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
+
 )
 
 var (
 	dsn="mongodb+srv://vscoproject:victoriasecret@cluster0.snfeuii.mongodb.net/?retryWrites=true&w=majority"
 	PORT   string
+
 )
 
 
@@ -59,6 +63,17 @@ func main() {
 		IdleTimeout:  time.Second * 60,
 		Handler:      router, // Pass our instance of gorilla/mux in.
 	}
+	//Intialize session
+	store:=sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
+	//Configuring the session
+	store.Options=&sessions.Options{
+		Domain: "localhost",
+		Path: "/",
+		MaxAge:0,
+		HttpOnly: true,
+		Secure: false,
+	}
+	
 	
 	userDB:=new(database.User)
 	userDB.Client=client
@@ -70,6 +85,13 @@ func main() {
 	router.Use(middleware.WriteToConsole)
 	//Add endpoints
 	router.HandleFunc("/user/register",userHandler.Regsiter)
+	router.HandleFunc("/user/login",userHandler.Login)
+	router.HandleFunc("/user/me",userHandler.Me)
+
+	
+	//Starting the server
 	srv.ListenAndServe()
+
+
 }
 
