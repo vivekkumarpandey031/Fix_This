@@ -15,8 +15,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-
-
 type UserHandler struct {
 	DB *database.User
 }
@@ -45,44 +43,44 @@ func init(){
 
 var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
 
-func(u *UserHandler)Regsiter(w http.ResponseWriter,r *http.Request){
-	if r.Method!="POST"{
+func (u *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
 		glog.Errorln("Method not implemented")
 		w.WriteHeader(http.StatusNotImplemented)
 		w.Write([]byte("Method not implemented"))
 		return
 	}
-	user:= new(models.User)
-	err:=json.NewDecoder(r.Body).Decode(user)
-	
-	if err!=nil{
+	user := new(models.User)
+	err := json.NewDecoder(r.Body).Decode(user)
+
+	if err != nil {
 		glog.Errorln(err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Invalid Data.Please contact admin"))
 		return
 	}
 
-	err=user.Validate()
-	if err!=nil{
+	err = user.Validate()
+	if err != nil {
 		glog.Errorln(err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
-	
+
 	}
 
 	//Crypting the password
-	hashedPassword,err:=bcrypt.GenerateFromPassword([]byte(user.Password),bcrypt.MinCost)
-	if err!=nil{
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.MinCost)
+	if err != nil {
 		glog.Errorln(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Cannot store hashed password"))
 	}
-	user.Password=string(hashedPassword)
-	
+	user.Password = string(hashedPassword)
+
 	//Inserting into the database
-	result,err:=u.DB.Insert(context.TODO(),user)
-	if err!=nil{
+	result, err := u.DB.Insert(context.TODO(), user)
+	if err != nil {
 		glog.Errorln(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
@@ -94,7 +92,7 @@ func(u *UserHandler)Regsiter(w http.ResponseWriter,r *http.Request){
 	w.Write([]byte(result.(primitive.ObjectID).String()))
 }
 
-func (u * UserHandler)Login(w http.ResponseWriter,r * http.Request ){
+func (u *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	/* 	//Database connection
 	dsn:="mongodb+srv://vscoproject:victoriasecret@cluster0.snfeuii.mongodb.net/?retryWrites=true&w=majority"
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1) //which server ur using
@@ -108,7 +106,7 @@ func (u * UserHandler)Login(w http.ResponseWriter,r * http.Request ){
 		return
 	}*/
 
-	if r.Method!="POST"{
+	if r.Method != "POST" {
 		glog.Errorln("Method not implemented")
 		w.WriteHeader(http.StatusNotImplemented)
 		w.Write([]byte("Method not implemented"))
@@ -116,21 +114,20 @@ func (u * UserHandler)Login(w http.ResponseWriter,r * http.Request ){
 	}
 
 	//Get the user data
-	user:=new (models.User)
-	err:=json.NewDecoder(r.Body).Decode(user)
-	if err!=nil{
+	user := new(models.User)
+	err := json.NewDecoder(r.Body).Decode(user)
+	if err != nil {
 		glog.Errorln(err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Invalid Data.Please contact admin"))
 		return
 	}
 
-
 	//Authenticate if the data is correct
 	//ctx,cancel:=context.WithDeadline(context.Background(),time.Now().Add(10))
 	//defer cancel()
-	data,err:=u.DB.Find(context.TODO(),user)
-	if data==nil || err!=nil{
+	data, err := u.DB.Find(context.TODO(), user)
+	if data == nil || err != nil {
 		glog.Errorln(err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Invalid Data.Please contact admin"))
@@ -138,10 +135,10 @@ func (u * UserHandler)Login(w http.ResponseWriter,r * http.Request ){
 	}
 
 	//Get a session
-	session,_:=store.Get(r,"user")
+	session, _ := store.Get(r, "user")
 	//Set some session values
-	session.Values["username"]=data.Name
-	session.Values["password"]=data.Password
+	session.Values["username"] = data.Name
+	session.Values["password"] = data.Password
 
 	err = session.Save(r, w)
 	if err != nil {
@@ -149,21 +146,19 @@ func (u * UserHandler)Login(w http.ResponseWriter,r * http.Request ){
 		return
 	}
 	//just testing
-	w.Header().Set("Content-type","plain/text")
+	w.Header().Set("Content-type", "plain/text")
 	w.Write([]byte("Succesful login"))
-} 
+}
 
-
-func (u* UserHandler) Me(w http.ResponseWriter,r *http.Request){
-	if r.Method!="GET"{
+func (u *UserHandler) Me(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
 		glog.Errorln("Method not implemented")
 		w.WriteHeader(http.StatusNotImplemented)
 		w.Write([]byte("Method not implemented"))
 		return
-
 	}
 
-	session,err:=store.Get(r,"user")
+	session, err := store.Get(r, "user")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -171,14 +166,13 @@ func (u* UserHandler) Me(w http.ResponseWriter,r *http.Request){
 
 	// Retrieve our session values
 	username := session.Values["username"]
-	password:=session.Values["password"]
-	w.Write([]byte(fmt.Sprintf("My username is %v and password is %v", username,password)))
+	password := session.Values["password"]
+	if username == nil || password == nil {
+		glog.Errorln("Unauthorized access")
+		w.Write([]byte("Try Login to get Access"))
+
+	} else {
+		w.Write([]byte(fmt.Sprintf("My username is %v and password is %v", username, password)))
+	}
 
 }
-
-
-
-
-
-
-
