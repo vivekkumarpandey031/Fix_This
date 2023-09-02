@@ -37,3 +37,23 @@ func (l *Laptop) GetAll(ctx context.Context) ([]models.Laptop, error) {
 
 	return documents, nil
 }
+
+func (l *Laptop) Insert(ctx context.Context, userproblem *models.UserProblem) (any, error) {
+	if l.Client == nil {
+		return nil, fmt.Errorf("nil connection")
+	}
+	//Check if the problem exists in the problem database
+	problem := new(models.Problem)
+	err := l.Client.Database("problemdb").Collection("problems").FindOne(ctx, bson.D{{"type", "mobile"}, {"name", userproblem.Problem}}).Decode(problem)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			// This error means your query did not match any documents.
+			return nil, err
+		} else {
+			return nil, fmt.Errorf("Internal server error")
+		}
+	}
+	//Insert into the problems database
+	result, err := l.Client.Database("userproblemdb").Collection("userproblems").InsertOne(ctx, userproblem)
+	return result.InsertedID, err
+}

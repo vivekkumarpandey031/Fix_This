@@ -100,8 +100,10 @@ func main() {
 	router.HandleFunc("/user/login", userHandler.Login)
 	router.HandleFunc("/user/me", userHandler.Me)
 	router.HandleFunc("/user/mobile", mobileHandler.GetAll)
-	//router.HandleFunc("/user/mobileproblem", mobileHandler.MobileProblem)
+	router.HandleFunc("/user/addmobileproblem", mobileHandler.AddMobileProblem)
+	router.HandleFunc("/user/addlaptopproblem", laptopHandler.AddLaptopProblem)
 	router.HandleFunc("/user/laptop", laptopHandler.GetAll)
+	router.HandleFunc("/user/receipt", userHandler.Receipt)
 
 	srv.ListenAndServe()
 }

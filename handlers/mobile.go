@@ -64,11 +64,12 @@ func (m *Mobilehandler) GetAll(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (m *Mobilehandler) MobileProblem(w http.ResponseWriter, r *http.Request) {
+func (m *Mobilehandler) AddMobileProblem(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		glog.Errorln("Method not Implemented")
 		w.WriteHeader(http.StatusNotImplemented)
 		w.Write([]byte("Method not implemented"))
+		return
 	}
 
 	session, err := store.Get(r, "user")
@@ -87,8 +88,11 @@ func (m *Mobilehandler) MobileProblem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mobile := new(models.Mobile)
-	err = json.NewDecoder(r.Body).Decode(mobile)
+	//Encode data to the json
+	userproblem := new(models.UserProblem)
+	err = json.NewDecoder(r.Body).Decode(userproblem)
+	userproblem.UID = session.Values["id"].(string)
+	userproblem.Type = "mobile"
 
 	if err != nil {
 		glog.Errorln(err)
@@ -97,26 +101,15 @@ func (m *Mobilehandler) MobileProblem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//Validate the data
-	err = mobile.Validate()
-	if err != nil {
-		glog.Errorln(err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	//Insert into the problems database
+	//Insert the response to Problems database
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	result, err := m.DB.Insert(ctx, mobile)
-
+	result, err := m.DB.Insert(ctx, userproblem)
 	if err != nil {
-		glog.Errorln(err.Error())
+		glog.Errorln(err)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		w.Write([]byte("Problem not in our database"))
+		return
 	}
-
 	w.Write([]byte(result.(primitive.ObjectID).String()))
-
 }
