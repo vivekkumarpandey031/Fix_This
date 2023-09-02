@@ -139,6 +139,7 @@ func (u *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	//Set some session values
 	session.Values["username"] = data.Name
 	session.Values["password"] = data.Password
+	session.Values["id"] = data.ID.Hex()
 
 	err = session.Save(r, w)
 	if err != nil {
@@ -167,12 +168,13 @@ func (u *UserHandler) Me(w http.ResponseWriter, r *http.Request) {
 	// Retrieve our session values
 	username := session.Values["username"]
 	password := session.Values["password"]
+	id := session.Values["id"]
 	if username == nil || password == nil {
 		glog.Errorln("Unauthorized access")
 		w.Write([]byte("Try Login to get Access"))
 
 	} else {
-		w.Write([]byte(fmt.Sprintf("My username is %v and password is %v", username, password)))
+		w.Write([]byte(fmt.Sprintf("My username is %v and password is %v and my id is %v", username, password, id)))
 	}
 
 }

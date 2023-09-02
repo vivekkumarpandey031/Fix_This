@@ -11,19 +11,34 @@ import (
 	"golang-project/handlers"
 	"golang-project/middleware"
 	"net/http"
+	"os"
 	"time"
+
 	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
 )
 
 var (
-	dsn="mongodb+srv://vscoproject:victoriasecret@cluster0.snfeuii.mongodb.net/?retryWrites=true&w=majority"
-	PORT   string
+	dsn  = "mongodb+srv://vscoproject:victoriasecret@cluster0.snfeuii.mongodb.net/?retryWrites=true&w=majority"
+	PORT string
 )
 
-
-func init(){
+func init() {
+	myDir, _ := os.Getwd()
 	flag.Set("logtostderr", "true")
+	flag.Set("log_dir", myDir+"/log/dir")
 	flag.Parse()
+	//Intialize session
+	store := sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
+	//Configuring the session
+	store.Options = &sessions.Options{
+		Domain:   "localhost",
+		Path:     "/",
+		MaxAge:   0,
+		HttpOnly: true,
+		Secure:   false,
+	}
+
 }
 
 func main() {
@@ -39,8 +54,8 @@ func main() {
 			panic(err)
 		}
 	}()
-	
-	err=database.Ping(client,"demo")
+
+	err = database.Ping(client, "demo")
 	if err != nil {
 		panic(err)
 	} else {
@@ -59,17 +74,34 @@ func main() {
 		IdleTimeout:  time.Second * 60,
 		Handler:      router, // Pass our instance of gorilla/mux in.
 	}
-	
-	userDB:=new(database.User)
-	userDB.Client=client
-	userDB.Dbname="userdb"
-	userDB.Collection="users"
-	userHandler:=new(handlers.UserHandler)
-	userHandler.DB=userDB
-	
+
+	userDB := new(database.User)
+	userDB.Client = client
+	userDB.Dbname = "userdb"
+	userDB.Collection = "users"
+	userHandler := new(handlers.UserHandler)
+	userHandler.DB = userDB
+	mobileHandler := new(handlers.Mobilehandler)
+	mobileDb := new(database.Mobile)
+	mobileDb.Client = client
+	mobileDb.Dbname = "mobiledb"
+	mobileDb.Collection = "mobiles"
+	mobileHandler.DB = mobileDb
+	laptopHandler := new(handlers.Laptophandler)
+	laptopDb := new(database.Laptop)
+	laptopDb.Client = client
+	laptopDb.Dbname = "laptopdb"
+	laptopDb.Collection = "laptops"
+	laptopHandler.DB = laptopDb
+
 	router.Use(middleware.WriteToConsole)
 	//Add endpoints
-	router.HandleFunc("/user/register",userHandler.Regsiter)
+	router.HandleFunc("/user/register", userHandler.Register)
+	router.HandleFunc("/user/login", userHandler.Login)
+	router.HandleFunc("/user/me", userHandler.Me)
+	router.HandleFunc("/user/mobile", mobileHandler.GetAll)
+	//router.HandleFunc("/user/mobileproblem", mobileHandler.MobileProblem)
+	router.HandleFunc("/user/laptop", laptopHandler.GetAll)
+
 	srv.ListenAndServe()
 }
-

@@ -1,4 +1,4 @@
-//User Model 
+// User Model
 package models
 
 import (
@@ -9,22 +9,22 @@ import (
 )
 
 type User struct {
-	ID primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
-	Name string `bson:"name" json:"name"`
-	Password string `bson:"password" json:"password"`
-	Email string `bson:"email" json:"email"`
+	ID       primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
+	Name     string             `bson:"name" json:"name"`
+	Password string             `bson:"password" json:"password"`
+	Email    string             `bson:"email" json:"email"`
 }
 
-func (u *User)isValidate() error{
-	if u.Name==""{
+func (u *User) Validate() error {
+	if u.Name == "" {
 		return errors.New("empty username field")
 	}
-	if u.Password==""{
+	if u.Password == "" {
 		return errors.New("empty password field")
 	}
-	if u.Email==""{
+	if u.Email == "" {
 		return fmt.Errorf("invalid email field")
 	}
-	
+
 	return nil
 }
