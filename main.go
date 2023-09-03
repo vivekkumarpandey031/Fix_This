@@ -25,7 +25,7 @@ var (
 
 func init() {
 	myDir, _ := os.Getwd()
-	flag.Set("logtostderr", "true")
+	flag.Set("logtostderr", "false")
 	flag.Set("log_dir", myDir+"/log/dir")
 	flag.Parse()
 	//Intialize session
@@ -93,6 +93,10 @@ func main() {
 	laptopDb.Dbname = "laptopdb"
 	laptopDb.Collection = "laptops"
 	laptopHandler.DB = laptopDb
+	serviceHandler := new(handlers.ServiceHandler)
+	serviceDB := new(database.Service)
+	serviceDB.Client = client
+	serviceHandler.DB = serviceDB
 
 	router.Use(middleware.WriteToConsole)
 	//Add endpoints
@@ -103,7 +107,6 @@ func main() {
 	router.HandleFunc("/user/addmobileproblem", mobileHandler.AddMobileProblem)
 	router.HandleFunc("/user/addlaptopproblem", laptopHandler.AddLaptopProblem)
 	router.HandleFunc("/user/laptop", laptopHandler.GetAll)
-	router.HandleFunc("/user/receipt", userHandler.Receipt)
-
+	router.HandleFunc("/service/receipt/{id}", serviceHandler.Receipt)
 	srv.ListenAndServe()
 }

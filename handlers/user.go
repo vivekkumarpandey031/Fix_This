@@ -8,7 +8,6 @@ import (
 	"golang-project/models"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/golang/glog"
 	"github.com/gorilla/sessions"
@@ -178,51 +177,4 @@ func (u *UserHandler) Me(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fmt.Sprintf("My username is %v and password is %v and my id is %v", username, password, id)))
 	}
 
-}
-
-func (u *UserHandler) Receipt(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		glog.Errorln("Method not implemented")
-		w.WriteHeader(http.StatusNotImplemented)
-		w.Write([]byte("Method not implemented"))
-	}
-
-	session, err := store.Get(r, "user")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Retrieve our session values
-	username := session.Values["username"]
-	password := session.Values["password"]
-	id := session.Values["id"].(string)
-	if username == nil || password == nil {
-		glog.Errorln("Unauthorized access")
-		w.WriteHeader(http.StatusForbidden)
-		w.Write([]byte("Try Login to get Access"))
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	//Query the userproblems database for type mobile and user id
-	cost1, time1, err := u.DB.TimeAndCost(ctx, id, "mobile")
-	if err != nil {
-		glog.Errorln(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal Server Error"))
-		return
-
-	}
-
-	//Querty the userproblems database for type laptop and user id
-	cost2, time2, err := u.DB.TimeAndCost(ctx, id, "laptop")
-	if err != nil {
-		glog.Errorln(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal Server Error"))
-		return
-
-	}
-	w.Write([]byte(fmt.Sprintf("The cost is %v and time is %v", cost1+cost2, time1+time2)))
 }

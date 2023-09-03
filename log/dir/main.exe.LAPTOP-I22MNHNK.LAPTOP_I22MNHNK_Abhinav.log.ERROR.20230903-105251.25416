@@ -1,0 +1,6 @@
+Log file created at: 2023/09/03 10:52:51
+Running on machine: LAPTOP-I22MNHNK
+Binary: Built with gc go1.20.6 for windows/amd64
+Previous log: <none>
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+E0903 10:52:51.865905   25416 service.go:31] Internal Server Error
