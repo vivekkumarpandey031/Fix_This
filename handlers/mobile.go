@@ -48,19 +48,15 @@ func (m *Mobilehandler) GetAll(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Something went wrong.Please contact admin"))
 		return
 	}
-	var docs string = ""
-	for _, doc := range documents {
-		data, err := json.Marshal(doc)
-		if err != nil {
-			glog.Errorln(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Something went wrong.Please contact admin"))
-			return
-		} else {
-			docs += string(data) + ","
-		}
+	w.Header().Set("Content-type", "application/json")
+	newJson, err := json.MarshalIndent(documents, "", "")
+	if err != nil {
+		glog.Errorln(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Something went wrong.Please contact admin"))
+		return
 	}
-	w.Write([]byte(docs[:len(docs)-1]))
+	w.Write(newJson)
 
 }
 
