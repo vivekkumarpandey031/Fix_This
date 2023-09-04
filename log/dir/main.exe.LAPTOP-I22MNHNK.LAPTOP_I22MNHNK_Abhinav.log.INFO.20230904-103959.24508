@@ -1,0 +1,6 @@
+Log file created at: 2023/09/04 10:39:59
+Running on machine: LAPTOP-I22MNHNK
+Binary: Built with gc go1.20.6 for windows/amd64
+Previous log: <none>
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I0904 10:39:59.771757   24508 middleware.go:12] GET called
