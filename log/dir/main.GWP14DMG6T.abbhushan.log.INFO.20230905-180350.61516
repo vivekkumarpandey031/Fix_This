@@ -1,0 +1,19 @@
+Log file created at: 2023/09/05 18:03:50
+Running on machine: GWP14DMG6T
+Binary: Built with gc go1.20.7 for darwin/arm64
+Previous log: <none>
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I0905 18:03:50.576330   61516 main.go:110] Listening on Port: 50080
+I0905 18:05:07.042588   61516 middleware.go:12] POST called
+E0905 18:05:07.042642   61516 user.go:57] invalid character '"' after object key:value pair
+I0905 18:05:21.647030   61516 middleware.go:12] POST called
+I0905 18:05:38.691915   61516 middleware.go:12] POST called
+I0905 18:05:51.706254   61516 middleware.go:12] POST called
+E0905 18:05:51.706272   61516 user.go:156] Method not implemented
+I0905 18:05:55.440104   61516 middleware.go:12] GET called
+I0905 18:06:28.203518   61516 middleware.go:12] GET called
+I0905 18:06:52.421127   61516 middleware.go:12] GET called
+I0905 18:07:41.712529   61516 middleware.go:12] GET called
+E0905 18:07:41.712548   61516 mobile.go:65] Method not Implemented
+I0905 18:07:45.674644   61516 middleware.go:12] POST called
+I0905 18:09:18.132643   61516 middleware.go:12] GET called
